@@ -6,19 +6,13 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
 import androidx.core.content.FileProvider
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class ImageRepository @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+class ImageRepository(private val context: Context) {
     suspend fun saveImageToGallery(bitmap: Bitmap, filename: String): Result<Uri> = withContext(Dispatchers.IO) {
         try {
             val imagesDir = File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "ImageToolkit")

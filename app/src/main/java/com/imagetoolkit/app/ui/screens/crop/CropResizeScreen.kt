@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun CropResizeScreen(
     navController: NavController,
-    viewModel: ImageViewModel = ImageViewModel()
+    viewModel: ImageViewModel = ImageViewModel(LocalContext.current)
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -67,9 +67,9 @@ fun CropResizeScreen(
                 }
             }
             UCrop.RESULT_ERROR -> {
-                val error = result.data?.getParcelableExtra<Throwable>(UCrop.EXTRA_ERROR)
+                val error = result.data?.getStringExtra(UCrop.EXTRA_ERROR)
                 scope.launch {
-                    viewModel.setMessage("Crop error: ${error?.message ?: "Unknown error"}")
+                    viewModel.setMessage("Crop error: ${error ?: "Unknown error"}")
                 }
             }
             else -> {

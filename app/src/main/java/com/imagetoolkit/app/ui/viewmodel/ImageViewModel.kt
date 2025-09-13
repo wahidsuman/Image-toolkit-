@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ImageViewModel : ViewModel() {
-    private val imageRepository = ImageRepository()
+class ImageViewModel(private val context: android.content.Context) : ViewModel() {
+    private val imageRepository = ImageRepository(context)
     
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     val selectedImageUri: StateFlow<Uri?> = _selectedImageUri.asStateFlow()
@@ -27,6 +27,10 @@ class ImageViewModel : ViewModel() {
     
     fun clearSelectedImage() {
         _selectedImageUri.value = null
+    }
+    
+    fun setMessage(message: String?) {
+        _message.value = message
     }
     
     fun saveImage(bitmap: android.graphics.Bitmap, filename: String) {
