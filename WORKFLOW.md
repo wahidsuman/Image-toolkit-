@@ -87,11 +87,17 @@ This repository uses a single comprehensive GitHub Actions workflow to build and
 - Check the Actions tab for error details
 - Ensure all dependencies are properly configured
 - Verify Android SDK setup in workflow
+- **Deprecated Actions**: Workflow uses latest action versions (v4)
 
 ### **Download Issues**
 - Artifacts expire after 30 days
 - Check if the workflow run completed successfully
 - Try downloading from Releases instead
+
+### **Action Deprecation Errors**
+- ✅ **Fixed**: Updated to `actions/upload-artifact@v4`
+- ✅ **Fixed**: Updated to `actions/cache@v4`
+- ✅ **Fixed**: Replaced `actions/create-release` with `softprops/action-gh-release`
 
 ## 📞 Support
 
