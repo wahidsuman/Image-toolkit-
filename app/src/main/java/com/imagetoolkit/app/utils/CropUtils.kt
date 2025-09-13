@@ -30,17 +30,20 @@ object CropUtils {
             setToolbarWidgetColor(ContextCompat.getColor(context, android.R.color.white))
         }
         
-        // Set aspect ratio
+        val uCrop = UCrop.of(sourceUri, destinationUri)
+            .withOptions(options)
+        
+        // Set aspect ratio using UCrop builder
         when (aspectRatio) {
-            "1:1" -> options.setAspectRatioOptions(1, 1)
-            "4:3" -> options.setAspectRatioOptions(4, 3)
-            "16:9" -> options.setAspectRatioOptions(16, 9)
-            "Free" -> options.setFreeStyleCropEnabled(true)
+            "1:1" -> uCrop.withAspectRatio(1f, 1f)
+            "4:3" -> uCrop.withAspectRatio(4f, 3f)
+            "16:9" -> uCrop.withAspectRatio(16f, 9f)
+            "Free" -> {
+                // Free style is already enabled in options
+            }
         }
         
-        return UCrop.of(sourceUri, destinationUri)
-            .withOptions(options)
-            .getIntent(context)
+        return uCrop.getIntent(context)
     }
     
     suspend fun getBitmapFromUri(context: Context, uri: Uri): Bitmap? {
