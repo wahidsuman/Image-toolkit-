@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.core.content.ContextCompat
 import com.yalantis.ucrop.UCrop
 import java.io.File
 import java.io.InputStream
@@ -23,9 +24,10 @@ object CropUtils {
             setCompressionFormat(android.graphics.Bitmap.CompressFormat.JPEG)
             setCompressionQuality(90)
             setFreeStyleCropEnabled(true)
-            setToolbarColor(androidx.compose.material3.MaterialTheme.colorScheme.primary.toArgb())
-            setStatusBarColor(androidx.compose.material3.MaterialTheme.colorScheme.primary.toArgb())
-            setToolbarWidgetColor(androidx.compose.material3.MaterialTheme.colorScheme.onPrimary.toArgb())
+            // Use default colors instead of MaterialTheme
+            setToolbarColor(ContextCompat.getColor(context, android.R.color.holo_blue_dark))
+            setStatusBarColor(ContextCompat.getColor(context, android.R.color.holo_blue_dark))
+            setToolbarWidgetColor(ContextCompat.getColor(context, android.R.color.white))
         }
         
         // Set aspect ratio

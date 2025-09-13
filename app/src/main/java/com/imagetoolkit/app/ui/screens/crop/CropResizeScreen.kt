@@ -63,10 +63,10 @@ fun CropResizeScreen(
     }
     
     LaunchedEffect(selectedImageUri) {
-        if (selectedImageUri != null) {
+        selectedImageUri?.let { uri ->
             val cropIntent = CropUtils.getCropIntent(
                 context = context,
-                sourceUri = selectedImageUri,
+                sourceUri = uri,
                 aspectRatio = selectedAspectRatio,
                 width = width.takeIf { it.isNotEmpty() }?.toIntOrNull(),
                 height = height.takeIf { it.isNotEmpty() }?.toIntOrNull()
