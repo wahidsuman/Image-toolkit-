@@ -76,7 +76,29 @@ app/
 - **Responsive Layout**: Optimized for different screen sizes
 - **Smooth Animations**: Transitions and loading states
 
-## 🔧 Setup Instructions
+## 📱 Download APK
+
+### Option 1: GitHub Actions (Recommended)
+1. Go to the **Actions** tab in this repository
+2. Click on the latest workflow run
+3. Scroll down to the **Artifacts** section
+4. Download either `app-debug-apk` or `app-release-apk`
+
+### Option 2: GitHub Releases
+1. Go to the **Releases** page
+2. Download the latest APK from the release assets
+3. Install on your Android device
+
+### Option 3: Local Build
+```bash
+# Build APKs locally
+./build-apk.sh
+
+# Or use the existing build script
+./build.sh
+```
+
+## 🔧 Development Setup
 
 1. **Clone the repository**
    ```bash
