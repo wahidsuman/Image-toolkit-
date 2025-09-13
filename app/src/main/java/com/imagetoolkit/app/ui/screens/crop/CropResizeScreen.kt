@@ -30,13 +30,16 @@ import kotlinx.coroutines.launch
 @Composable
 fun CropResizeScreen(
     navController: NavController,
-    viewModel: ImageViewModel = ImageViewModel(LocalContext.current)
+    viewModel: ImageViewModel? = null
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val selectedImageUri by viewModel.selectedImageUri.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val message by viewModel.message.collectAsState()
+    
+    val actualViewModel = viewModel ?: remember { ImageViewModel(context) }
+    
+    val selectedImageUri by actualViewModel.selectedImageUri.collectAsState()
+    val isLoading by actualViewModel.isLoading.collectAsState()
+    val message by actualViewModel.message.collectAsState()
     
     var showAspectRatioDialog by remember { mutableStateOf(false) }
     var selectedAspectRatio by remember { mutableStateOf("Free") }
@@ -56,12 +59,12 @@ fun CropResizeScreen(
                             val bitmap = CropUtils.getBitmapFromUri(context, uri)
                             bitmap?.let {
                                 val filename = "cropped_${System.currentTimeMillis()}"
-                                viewModel.saveImage(it, filename)
+                                actualViewModel.saveImage(it, filename)
                             } ?: run {
-                                viewModel.setMessage("Failed to load cropped image")
+                                actualViewModel.setMessage("Failed to load cropped image")
                             }
                         } catch (e: Exception) {
-                            viewModel.setMessage("Error processing cropped image: ${e.message}")
+                            actualViewModel.setMessage("Error processing cropped image: ${e.message}")
                         }
                     }
                 }
@@ -69,12 +72,12 @@ fun CropResizeScreen(
             UCrop.RESULT_ERROR -> {
                 val error = result.data?.getStringExtra(UCrop.EXTRA_ERROR)
                 scope.launch {
-                    viewModel.setMessage("Crop error: ${error ?: "Unknown error"}")
+                    actualViewModel.setMessage("Crop error: ${error ?: "Unknown error"}")
                 }
             }
             else -> {
                 scope.launch {
-                    viewModel.setMessage("Crop cancelled")
+                    actualViewModel.setMessage("Crop cancelled")
                 }
             }
         }
@@ -92,7 +95,7 @@ fun CropResizeScreen(
                 )
                 cropLauncher.launch(cropIntent)
             } catch (e: Exception) {
-                viewModel.setMessage("Error creating crop intent: ${e.message}")
+                actualViewModel.setMessage("Error creating crop intent: ${e.message}")
             }
         }
     }

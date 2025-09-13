@@ -26,10 +26,13 @@ import com.imagetoolkit.app.ui.viewmodel.ImageViewModel
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: ImageViewModel = ImageViewModel(LocalContext.current)
+    viewModel: ImageViewModel? = null
 ) {
+    val context = LocalContext.current
+    val actualViewModel = viewModel ?: remember { ImageViewModel(context) }
+    
     var showImagePicker by remember { mutableStateOf(false) }
-    val selectedImageUri by viewModel.selectedImageUri.collectAsState()
+    val selectedImageUri by actualViewModel.selectedImageUri.collectAsState()
     
     Column(
         modifier = Modifier
@@ -132,7 +135,12 @@ fun HomeScreen(
                     feature = feature,
                     onClick = {
                         if (feature.isAvailable) {
-                            navController.navigate(feature.id)
+                            if (feature.id == "crop_resize" && selectedImageUri == null) {
+                                // Show image picker first for crop feature
+                                showImagePicker = true
+                            } else {
+                                navController.navigate(feature.id)
+                            }
                         }
                     }
                 )
@@ -144,8 +152,10 @@ fun HomeScreen(
         ImagePickerDialog(
             onDismiss = { showImagePicker = false },
             onImageSelected = { uri ->
-                viewModel.setSelectedImage(uri)
+                actualViewModel.setSelectedImage(uri)
                 showImagePicker = false
+                // Navigate to crop screen after selecting image
+                navController.navigate("crop_resize")
             }
         )
     }
