@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ImageToolkit</string>
+    <string name="select_image">Select Image</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+    <string name="background_removal">Background Removal</string>
+    <string name="background_removal_desc">Remove background from images</string>
+    <string name="filters_effects">Filters &amp; Effects</string>
+    <string name="filters_effects_desc">Apply filters and effects</string>
+    <string name="crop_resize">Crop &amp; Resize</string>
+    <string name="crop_resize_desc">Crop and resize your images</string>
+    <string name="format_conversion">Format Conversion</string>
+    <string name="format_conversion_desc">Convert between image formats</string>
+    <string name="rotate_flip">Rotate &amp; Flip</string>
+    <string name="rotate_flip_desc">Rotate and flip images</string>
+    <string name="image_compression">Image Compression</string>
+    <string name="image_compression_desc">Compress images to reduce size</string>
+    <string name="coming_soon">Coming Soon</string>
+    <string name="coming_soon_desc">This feature will be available soon</string>
+    <string name="aspect_ratio">Aspect Ratio</string>
+    <string name="free">Free</string>
+    <string name="rotate_left">Rotate Left</string>
+    <string name="rotate_right">Rotate Right</string>
+    <string name="flip_horizontal">Flip Horizontal</string>
+    <string name="flip_vertical">Flip Vertical</string>
+    <string name="resize">Resize</string>
+    <string name="width">Width</string>
+    <string name="height">Height</string>
+    <string name="save_to_gallery">Save to Gallery</string>
+    <string name="share">Share</string>
+    <string name="camera_permission_required">Camera permission is required to take photos</string>
+    <string name="storage_permission_required">Storage permission is required to access images</string>
+    <string name="image_saved">Image saved successfully</string>
+    <string name="error_saving_image">Error saving image</string>
+    <string name="no_image_selected">No image selected</string>
+    <string name="select_image_first">Please select an image first</string>
+</resources>
