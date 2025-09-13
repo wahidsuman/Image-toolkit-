@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.imagetoolkit.app.R
 import com.imagetoolkit.app.data.ImageFeatures
@@ -26,7 +25,7 @@ import com.imagetoolkit.app.ui.viewmodel.ImageViewModel
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: ImageViewModel = hiltViewModel()
+    viewModel: ImageViewModel = ImageViewModel()
 ) {
     var showImagePicker by remember { mutableStateOf(false) }
     val selectedImageUri by viewModel.selectedImageUri.collectAsState()
