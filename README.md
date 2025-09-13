@@ -89,7 +89,14 @@ app/
 2. Download the latest APK from the release assets
 3. Install on your Android device
 
-### Option 3: Local Build
+### Option 3: Manual Trigger
+1. Go to **Actions** → **ImageToolkit APK Workflow**
+2. Click **Run workflow**
+3. Choose build type (debug/release/both)
+4. Optionally create a release
+5. Download from artifacts or releases
+
+### Option 4: Local Build
 ```bash
 # Build APKs locally
 ./build-apk.sh

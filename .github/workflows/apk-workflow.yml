@@ -1,0 +1,208 @@
+name: ImageToolkit APK Workflow
+
+on:
+  # Automatic triggers
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # Manual trigger with options
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Type of APK to build'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+        - debug
+        - release
+        - both
+      create_release:
+        description: 'Create GitHub release (only for manual trigger)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Build Debug APK
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_type == 'debug' || github.event_name == 'workflow_dispatch' && inputs.build_type == 'both' || github.event_name != 'workflow_dispatch' }}
+      run: ./gradlew assembleDebug
+      
+    - name: Build Release APK
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_type == 'release' || github.event_name == 'workflow_dispatch' && inputs.build_type == 'both' || github.event_name != 'workflow_dispatch' }}
+      run: ./gradlew assembleRelease
+      
+    - name: Upload Debug APK
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_type == 'debug' || github.event_name == 'workflow_dispatch' && inputs.build_type == 'both' || github.event_name != 'workflow_dispatch' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 30
+        
+    - name: Upload Release APK
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_type == 'release' || github.event_name == 'workflow_dispatch' && inputs.build_type == 'both' || github.event_name != 'workflow_dispatch' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release-apk
+        path: app/build/outputs/apk/release/app-release.apk
+        retention-days: 30
+        
+    - name: Get version info
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.create_release }}" = "true" ]; then
+          echo "VERSION=manual-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+          echo "TAG_NAME=manual-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "TAG_NAME=$VERSION" >> $GITHUB_OUTPUT
+        else
+          echo "VERSION=build-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+          echo "TAG_NAME=" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Create Release
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_release == 'true' || startsWith(github.ref, 'refs/tags/') }}
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version.outputs.TAG_NAME }}
+        release_name: ImageToolkit ${{ steps.version.outputs.VERSION }}
+        body: |
+          ## 📱 ImageToolkit APK Release
+          
+          ### What's New
+          - Image selection from Camera/Gallery
+          - Crop & Resize functionality with uCrop
+          - Modern Material Design 3 UI
+          - Built with Jetpack Compose
+          
+          ### Installation
+          1. Download the APK file below
+          2. Enable "Install from unknown sources" on your Android device
+          3. Install the APK file
+          
+          ### System Requirements
+          - Android 7.0 (API level 24) or higher
+          - Minimum 50MB free storage
+          
+          ### Features
+          - 🖼️ **Image Selection**: Choose from camera or gallery
+          - ✂️ **Crop & Resize**: Professional image editing tools
+          - 🎨 **Modern UI**: Beautiful Material Design 3 interface
+          - 📱 **Optimized**: Smooth performance on all devices
+          
+          ### Download
+          Choose the APK that matches your needs:
+          - **Debug APK**: For testing and development
+          - **Release APK**: For production use (recommended)
+        draft: false
+        prerelease: ${{ github.event_name == 'workflow_dispatch' }}
+        
+    - name: Upload Release APK to Release
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_release == 'true' && inputs.build_type == 'release' || startsWith(github.ref, 'refs/tags/') }}
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./app/build/outputs/apk/release/app-release.apk
+        asset_name: ImageToolkit-${{ steps.version.outputs.VERSION }}.apk
+        asset_content_type: application/vnd.android.package-archive
+        
+    - name: Upload Debug APK to Release
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_release == 'true' && inputs.build_type == 'debug' || startsWith(github.ref, 'refs/tags/') }}
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./app/build/outputs/apk/debug/app-debug.apk
+        asset_name: ImageToolkit-${{ steps.version.outputs.VERSION }}-debug.apk
+        asset_content_type: application/vnd.android.package-archive
+        
+    - name: Create Build Summary
+      run: |
+        echo "## 📱 ImageToolkit APK Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Version**: ${{ steps.version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Time**: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "**Build Type**: ${{ inputs.build_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Create Release**: ${{ inputs.create_release }}" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.build_type }}" = "debug" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.build_type }}" = "both" ] || [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+          echo "✅ **Debug APK**: Built successfully" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.build_type }}" = "release" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.build_type }}" = "both" ] || [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+          echo "✅ **Release APK**: Built successfully" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📥 Download Instructions:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.create_release }}" = "true" ] || [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          echo "🎉 **GitHub Release Created!**" >> $GITHUB_STEP_SUMMARY
+          echo "1. Go to the **Releases** page in this repository" >> $GITHUB_STEP_SUMMARY
+          echo "2. Download the APK file(s) from the latest release" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "📦 **Download from Artifacts:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. Go to the **Actions** tab in this repository" >> $GITHUB_STEP_SUMMARY
+          echo "2. Click on this workflow run" >> $GITHUB_STEP_SUMMARY
+          echo "3. Scroll down to the **Artifacts** section" >> $GITHUB_STEP_SUMMARY
+          echo "4. Download the APK file(s)" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📋 APK Details:" >> $GITHUB_STEP_SUMMARY
+        echo "- **App Name**: ImageToolkit" >> $GITHUB_STEP_SUMMARY
+        echo "- **Package**: com.imagetoolkit.app" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version**: 1.0" >> $GITHUB_STEP_SUMMARY
+        echo "- **Min SDK**: 24 (Android 7.0)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Target SDK**: 34 (Android 14)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🚀 Usage:" >> $GITHUB_STEP_SUMMARY
+        echo "- **Debug APK**: For testing and development" >> $GITHUB_STEP_SUMMARY
+        echo "- **Release APK**: For production use (recommended)" >> $GITHUB_STEP_SUMMARY

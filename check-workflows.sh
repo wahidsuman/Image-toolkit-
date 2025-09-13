@@ -37,9 +37,10 @@ fi
 
 echo ""
 echo "🚀 Workflow Status:"
-echo "   • Build APK: Triggers on push to main"
-echo "   • Release APK: Triggers on version tags"
-echo "   • Manual Build: Can be triggered manually"
+echo "   • Single APK Workflow: Handles everything"
+echo "   • Auto-trigger: Push to main, pull requests"
+echo "   • Manual trigger: With build type selection"
+echo "   • Release creation: On version tags or manual"
 echo ""
 
 echo "📥 How to Download APKs:"
@@ -51,9 +52,10 @@ echo ""
 
 echo "🔧 Manual Trigger:"
 echo "   1. Go to Actions tab in GitHub"
-echo "   2. Select 'Manual APK Build' workflow"
+echo "   2. Select 'ImageToolkit APK Workflow'"
 echo "   3. Click 'Run workflow'"
 echo "   4. Choose build type (debug/release/both)"
+echo "   5. Optionally create a release"
 echo ""
 
 echo "📋 Next Steps:"
