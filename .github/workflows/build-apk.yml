@@ -1,4 +1,4 @@
-name: Build and Release APK
+name: Build APK
 
 on:
   push:
@@ -21,6 +21,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+      
     - name: Cache Gradle packages
       uses: actions/cache@v3
       with:
@@ -34,7 +37,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
       
-    - name: Build APK
+    - name: Build Debug APK
       run: ./gradlew assembleDebug
       
     - name: Build Release APK
