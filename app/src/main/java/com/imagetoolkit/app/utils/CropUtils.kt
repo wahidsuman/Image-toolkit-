@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.yalantis.ucrop.UCrop
 import java.io.File
 import java.io.InputStream
@@ -18,7 +19,12 @@ object CropUtils {
         width: Int? = null,
         height: Int? = null
     ): Intent {
-        val destinationUri = Uri.fromFile(File(context.cacheDir, "cropped_${System.currentTimeMillis()}.jpg"))
+        val destinationFile = File(context.cacheDir, "cropped_${System.currentTimeMillis()}.jpg")
+        val destinationUri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            destinationFile
+        )
         
         val options = UCrop.Options().apply {
             setCompressionFormat(android.graphics.Bitmap.CompressFormat.JPEG)

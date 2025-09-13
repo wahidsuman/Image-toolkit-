@@ -47,16 +47,35 @@ fun CropResizeScreen(
     val cropLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
-            val resultUri = result.data?.getParcelableExtra<Uri>(UCrop.EXTRA_OUTPUT_URI)
-            resultUri?.let { uri ->
-                scope.launch {
-                    // Process the cropped image
-                    val bitmap = CropUtils.getBitmapFromUri(context, uri)
-                    bitmap?.let {
-                        val filename = "cropped_${System.currentTimeMillis()}"
-                        viewModel.saveImage(it, filename)
+        when (result.resultCode) {
+            android.app.Activity.RESULT_OK -> {
+                val resultUri = result.data?.getParcelableExtra<Uri>(UCrop.EXTRA_OUTPUT_URI)
+                resultUri?.let { uri ->
+                    scope.launch {
+                        try {
+                            // Process the cropped image
+                            val bitmap = CropUtils.getBitmapFromUri(context, uri)
+                            bitmap?.let {
+                                val filename = "cropped_${System.currentTimeMillis()}"
+                                viewModel.saveImage(it, filename)
+                            } ?: run {
+                                viewModel.setMessage("Failed to load cropped image")
+                            }
+                        } catch (e: Exception) {
+                            viewModel.setMessage("Error processing cropped image: ${e.message}")
+                        }
                     }
+                }
+            }
+            UCrop.RESULT_ERROR -> {
+                val error = result.data?.getParcelableExtra<Throwable>(UCrop.EXTRA_ERROR)
+                scope.launch {
+                    viewModel.setMessage("Crop error: ${error?.message ?: "Unknown error"}")
+                }
+            }
+            else -> {
+                scope.launch {
+                    viewModel.setMessage("Crop cancelled")
                 }
             }
         }
@@ -64,14 +83,18 @@ fun CropResizeScreen(
     
     LaunchedEffect(selectedImageUri) {
         selectedImageUri?.let { uri ->
-            val cropIntent = CropUtils.getCropIntent(
-                context = context,
-                sourceUri = uri,
-                aspectRatio = selectedAspectRatio,
-                width = width.takeIf { it.isNotEmpty() }?.toIntOrNull(),
-                height = height.takeIf { it.isNotEmpty() }?.toIntOrNull()
-            )
-            cropLauncher.launch(cropIntent)
+            try {
+                val cropIntent = CropUtils.getCropIntent(
+                    context = context,
+                    sourceUri = uri,
+                    aspectRatio = selectedAspectRatio,
+                    width = width.takeIf { it.isNotEmpty() }?.toIntOrNull(),
+                    height = height.takeIf { it.isNotEmpty() }?.toIntOrNull()
+                )
+                cropLauncher.launch(cropIntent)
+            } catch (e: Exception) {
+                viewModel.setMessage("Error creating crop intent: ${e.message}")
+            }
         }
     }
     
